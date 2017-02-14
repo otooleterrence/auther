@@ -2,6 +2,7 @@
 
 var app = require('express')();
 var path = require('path');
+const session = require('express-session');
 
 // "Enhancing" middleware (does not send response, server-side effects only)
 
@@ -9,8 +10,28 @@ app.use(require('./logging.middleware'));
 
 app.use(require('./body-parsing.middleware'));
 
+app.use(session({
+  // this mandatory configuration ensures that session IDs are not predictable
+  secret: 'tongiscool', // or whatever you like
+  // these options are recommended and reduce session concurrency issues
+  resave: false,
+  saveUnitialized: false
+}));
+
+app.use('/', function (req, res, next) {
+  // req.session.cookie.sayHi = 'HELLO!!';
+  console.log('session', req.session);
+  next();
+});
+
+// app.use('/api', function (req, res, next) {
+//   if (!req.session.counter) req.session.counter = 0;
+//   console.log('counter', ++req.session.counter);
+//   next();
+// });
 
 // "Responding" middleware (may send a response back to client)
+
 
 app.use('/api', require('../api/api.router'));
 
